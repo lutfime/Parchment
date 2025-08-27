@@ -320,6 +320,8 @@ extension PageViewController: PageViewManagerDelegate {
                     height: scrollView.bounds.height
                 )
             }
+             // Ensure clipping is maintained during layout updates
+            viewController.view.clipsToBounds = true  // ← Added this line
         }
 
         // When updating the content offset we need to account for the
@@ -362,6 +364,8 @@ extension PageViewController: PageViewManagerDelegate {
         viewController.willMove(toParent: self)
         addChild(viewController)
         scrollView.addSubview(viewController.view)
+        // Ensure child view controllers are clipped to prevent NavigationSplitView overflow
+        viewController.view.clipsToBounds = true  // ← Added this line
         viewController.didMove(toParent: self)
     }
 
