@@ -356,8 +356,37 @@ final class PagingController: NSObject {
             configureMenuInteraction()
         }
 
+        // Update size cache and layout when options change
+        let menuItemSizeChanged: Bool = {
+            switch (oldValue.menuItemSize, options.menuItemSize) {
+            case (.fixed(let ow, let oh), .fixed(let nw, let nh)):
+                return ow != nw || oh != nh
+            case (.selfSizing(let oe, let oh), .selfSizing(let ne, let nh)):
+                return oe != ne || oh != nh
+            case (.sizeToFit(let om, let oh), .sizeToFit(let nm, let nh)):
+                return om != nm || oh != nh
+            default:
+                return true
+            }
+        }()
+
         sizeCache.options = options
-        collectionViewLayout.invalidateLayout()
+
+        if menuItemSizeChanged {
+            // Clear cached widths and reconfigure sizing strategy
+            sizeCache.clear()
+            sizeCache.implementsSizeDelegate = false
+            sizeCache.sizeForPagingItem = nil
+
+            if let currentPagingItem = state.currentPagingItem {
+                configureSizeCache(for: currentPagingItem)
+            }
+
+            collectionViewLayout.invalidateLayout()
+            collectionView.reloadData()
+        } else {
+            collectionViewLayout.invalidateLayout()
+        }
     }
 
     private func configureCollectionViewLayout() {

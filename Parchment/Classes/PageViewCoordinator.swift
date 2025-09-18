@@ -56,12 +56,15 @@ final class PageViewCoordinator: PagingViewControllerDataSource, PagingViewContr
         destinationViewController _: UIViewController,
         transitionSuccessful _: Bool
     ) {
-        if let item = pagingItem as? PageItem,
-           let index = parent.items.firstIndex(where: { $0.isEqual(to: item) }) {
-            parent.selectedIndex = index
-        }
-
-        parent.onDidScroll?(pagingItem)
+		DispatchQueue.main.async { [weak self] in
+			guard let self else { return }
+			if let item = pagingItem as? PageItem,
+			   let index = parent.items.firstIndex(where: { $0.isEqual(to: item) }) {
+				parent.selectedIndex = index
+			}
+			parent.onDidScroll?(pagingItem)
+		}
+        
     }
 
     func pagingViewController(

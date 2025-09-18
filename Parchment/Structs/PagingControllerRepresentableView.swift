@@ -55,6 +55,9 @@ struct PagingControllerRepresentableView: UIViewControllerRepresentable {
             pagingViewController.dataSource = context.coordinator
         }
         
+        // Apply updated options. If menuItemSize changes (e.g., when tab count
+        // goes from many to few), downstream observers in PagingController will
+        // clear size cache and invalidate layout via didSet logic.
         pagingViewController.options = options
         pagingViewController.indicatorClass = PagingHostingIndicatorView.self
 
