@@ -41,11 +41,19 @@ struct PagingControllerRepresentableView: UIViewControllerRepresentable {
         _ pagingViewController: PagingViewController,
         context: UIViewControllerRepresentableContext<PagingControllerRepresentableView>
     ) {
+        // Capture OLD identifiers before we update the coordinator's parent
+        var oldIdentifiers: Set<Int> = []
+        for old in context.coordinator.parent.items {
+            if let pageItem = old as? PageItem { oldIdentifiers.insert(pageItem.identifier) }
+        }
+
         // Build a lookup for the UPDATED items (after SwiftUI state change)
         var newItemsById: [Int: PagingItem] = [:]
+        var newIdentifiers: Set<Int> = []
         for newItem in items {
             if let pageItem = newItem as? PageItem {
                 newItemsById[pageItem.identifier] = pageItem
+                newIdentifiers.insert(pageItem.identifier)
             }
         }
 
@@ -73,6 +81,11 @@ struct PagingControllerRepresentableView: UIViewControllerRepresentable {
 
         // Keep selection only if the current item still exists in the NEW items.
         // Otherwise, reload around the first available item.
+        // If the identifiers changed, clear content immediately to avoid stale flash
+        if oldIdentifiers != newIdentifiers {
+            pagingViewController.removeContent()
+        }
+
         if let currentItem = pagingViewController.state.currentPagingItem,
            let pageItem = currentItem as? PageItem,
            newItemsById[pageItem.identifier] != nil {
