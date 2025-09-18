@@ -142,7 +142,7 @@ final class PagingController: NSObject {
             if pagingItem.isEqual(to: currentPagingItem) {
                 break
             }
-            print("[Parchment][PC] select during scrolling: jumping to \(pagingItem) from \(currentPagingItem)")
+//            print("[Parchment][PC] select during scrolling: jumping to \(pagingItem) from \(currentPagingItem)")
             state = .selected(pagingItem: pagingItem)
             reloadItems(around: pagingItem)
             delegate?.selectContent(
