@@ -58,6 +58,7 @@ struct PagingControllerRepresentableView: UIViewControllerRepresentable {
         }
 
         context.coordinator.parent = self
+        
 
         if pagingViewController.dataSource == nil {
             pagingViewController.dataSource = context.coordinator
@@ -83,21 +84,28 @@ struct PagingControllerRepresentableView: UIViewControllerRepresentable {
         // Otherwise, reload around the first available item.
         // If the identifiers changed, clear content to avoid stale flash, but only
         // when there is existing content; avoid wiping initial presentation.
+        var didRemoveContent = false
         if oldIdentifiers != newIdentifiers, pagingViewController.state.currentPagingItem != nil {
+            
             pagingViewController.removeContent()
+            didRemoveContent = true
         }
 
-        if let currentItem = pagingViewController.state.currentPagingItem,
-           let pageItem = currentItem as? PageItem,
-           newItemsById[pageItem.identifier] != nil {
+        if didRemoveContent {
+            pagingViewController.reloadData()
+        } else if let currentItem = pagingViewController.state.currentPagingItem,
+                  let pageItem = currentItem as? PageItem,
+                  newItemsById[pageItem.identifier] != nil {
             pagingViewController.reloadMenu()
         } else {
             pagingViewController.reloadData()
         }
 
-        // Refresh currently visible page content if identity is unchanged
-        if let currentItem = pagingViewController.state.currentPagingItem as? PageItem,
+        // Refresh currently visible page content if identity is unchanged and we didn't just clear it
+        if !didRemoveContent,
+           let currentItem = pagingViewController.state.currentPagingItem as? PageItem,
            let viewController = context.coordinator.controllers[currentItem.identifier]?.value {
+            
             currentItem.page.update(viewController)
         }
 
@@ -118,12 +126,18 @@ struct PagingControllerRepresentableView: UIViewControllerRepresentable {
         let count = items.count
         if count > 0 {
             let clamped = max(0, min(selectedIndex, count - 1))
-            if let current = pagingViewController.state.currentPagingItem as? PageItem,
-               current.index == clamped {
+            if didRemoveContent {
+                // Force reselect to reattach content even if the index didn't change
+                pagingViewController.select(index: clamped, animated: false)
             } else {
-                pagingViewController.select(index: clamped, animated: true)
+                if let current = pagingViewController.state.currentPagingItem as? PageItem,
+                   current.index == clamped {
+                } else {
+                    pagingViewController.select(index: clamped, animated: true)
+                }
             }
         } else {
+            
         }
     }
 }
