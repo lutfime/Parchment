@@ -41,11 +41,11 @@ struct PagingControllerRepresentableView: UIViewControllerRepresentable {
         _ pagingViewController: PagingViewController,
         context: UIViewControllerRepresentableContext<PagingControllerRepresentableView>
     ) {
-        var oldItems: [Int: PagingItem] = [:]
-
-        for oldItem in context.coordinator.parent.items {
-            if let oldItem = oldItem as? PageItem {
-                oldItems[oldItem.identifier] = oldItem
+        // Build a lookup for the UPDATED items (after SwiftUI state change)
+        var newItemsById: [Int: PagingItem] = [:]
+        for newItem in items {
+            if let pageItem = newItem as? PageItem {
+                newItemsById[pageItem.identifier] = pageItem
             }
         }
 
@@ -71,20 +71,12 @@ struct PagingControllerRepresentableView: UIViewControllerRepresentable {
             }
         }
 
-        // We only want to reload the content views when the items have actually
-        // changed. For items that are added, a new view controller instance will
-        // be created by the PageViewCoordinator.
+        // Keep selection only if the current item still exists in the NEW items.
+        // Otherwise, reload around the first available item.
         if let currentItem = pagingViewController.state.currentPagingItem,
            let pageItem = currentItem as? PageItem,
-            let oldItem = oldItems[pageItem.identifier] {
+           newItemsById[pageItem.identifier] != nil {
             pagingViewController.reloadMenu()
-            
-            if !oldItem.isEqual(to: currentItem) {
-                if let pageItem = currentItem as? PageItem,
-                   let viewController = context.coordinator.controllers[currentItem.identifier]?.value {
-                    pageItem.page.update(viewController)
-                }
-            }
         } else {
             pagingViewController.reloadData()
         }
@@ -102,6 +94,14 @@ struct PagingControllerRepresentableView: UIViewControllerRepresentable {
             return
         }
 
-        pagingViewController.select(index: selectedIndex, animated: true)
+        // Clamp and apply selected index after data reload.
+        let count = items.count
+        if count > 0 {
+            let clamped = max(0, min(selectedIndex, count - 1))
+//            if clamped != selectedIndex {
+//                selectedIndex = clamped
+//            }
+            pagingViewController.select(index: clamped, animated: true)
+        }
     }
 }

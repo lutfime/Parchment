@@ -1,4 +1,5 @@
 import UIKit
+import SwiftUI
 
 @available(iOS 14.0, *)
 @MainActor
@@ -26,6 +27,9 @@ final class PageViewCoordinator: PagingViewControllerDataSource, PagingViewContr
         _: PagingViewController,
         viewControllerAt index: Int
     ) -> UIViewController {
+        guard index >= 0 && index < parent.items.count else {
+            return UIViewController()
+        }
         let item = parent.items[index]
         let hostingViewController: UIViewController
 
@@ -46,7 +50,10 @@ final class PageViewCoordinator: PagingViewControllerDataSource, PagingViewContr
         _: PagingViewController,
         pagingItemAt index: Int
     ) -> PagingItem {
-        parent.items[index]
+        guard index >= 0 && index < parent.items.count else {
+            return parent.items.first ?? PageItem(identifier: 0, index: 0, page: Page("Error") { EmptyView() })
+        }
+        return parent.items[index]
     }
 
     func pagingViewController(
