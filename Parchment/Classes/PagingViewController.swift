@@ -459,9 +459,11 @@ open class PagingViewController:
     open func select(index: Int, animated: Bool = false) {
         switch dataSourceReference {
         case let .static(dataSource):
+			guard index < dataSource.items.count else { return }
             let pagingItem = dataSource.items[index]
             pagingController.select(pagingItem: pagingItem, animated: animated)
         case let .finite(dataSource):
+			guard index < dataSource.items.count else { return }
             let pagingItem = dataSource.items[index]
             pagingController.select(pagingItem: pagingItem, animated: animated)
         case .none:
