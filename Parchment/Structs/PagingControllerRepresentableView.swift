@@ -58,6 +58,16 @@ struct PagingControllerRepresentableView: UIViewControllerRepresentable {
         pagingViewController.options = options
         pagingViewController.indicatorClass = PagingHostingIndicatorView.self
 
+        // Ensure collection view registers cells for any new page identifiers
+        if let items = items as? [PageItem] {
+            for item in items {
+                pagingViewController.collectionView.register(
+                    PageItemCell.self,
+                    forCellWithReuseIdentifier: item.page.reuseIdentifier
+                )
+            }
+        }
+
         // We only want to reload the content views when the items have actually
         // changed. For items that are added, a new view controller instance will
         // be created by the PageViewCoordinator.
