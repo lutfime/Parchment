@@ -98,10 +98,13 @@ struct PagingControllerRepresentableView: UIViewControllerRepresentable {
         let count = items.count
         if count > 0 {
             let clamped = max(0, min(selectedIndex, count - 1))
-//            if clamped != selectedIndex {
-//                selectedIndex = clamped
-//            }
-            pagingViewController.select(index: clamped, animated: true)
+            if let current = pagingViewController.state.currentPagingItem as? PageItem,
+               current.index == clamped {
+            } else {
+                pagingViewController.select(index: clamped, animated: true)
+            }
+        } else {
         }
     }
 }
+

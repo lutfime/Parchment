@@ -137,6 +137,25 @@ final class PagingController: NSObject {
                 }
             }
 
+        case let .scrolling(currentPagingItem, _, _, _, _):
+            // If a new selection comes in while scrolling, jump directly to it
+            if pagingItem.isEqual(to: currentPagingItem) {
+                break
+            }
+            print("[Parchment][PC] select during scrolling: jumping to \(pagingItem) from \(currentPagingItem)")
+            state = .selected(pagingItem: pagingItem)
+            reloadItems(around: pagingItem)
+            delegate?.selectContent(
+                pagingItem: pagingItem,
+                direction: .none,
+                animated: false
+            )
+            collectionView.selectItem(
+                at: visibleItems.indexPath(for: pagingItem),
+                animated: false,
+                scrollPosition: options.scrollPosition
+            )
+
         default:
             break
         }

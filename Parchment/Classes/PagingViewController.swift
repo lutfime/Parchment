@@ -363,6 +363,7 @@ open class PagingViewController:
     /// Reload the data for the menu items. This method will not reload
     /// the view controllers.
     open func reloadMenu() {
+        print("[Parchment][PVC] reloadMenu()")
         var updatedItems: [PagingItem] = []
 
         switch dataSourceReference {
@@ -393,6 +394,7 @@ open class PagingViewController:
     /// as we then need to know what the initial item should be. You
     /// should use the reloadData(around:) method in that case.
     open func reloadData() {
+        print("[Parchment][PVC] reloadData()")
         var updatedItems: [PagingItem] = []
 
         switch dataSourceReference {
@@ -426,6 +428,7 @@ open class PagingViewController:
     /// - Parameter pagingItem: The `PagingItem` that will be selected
     /// after the data reloads.
     open func reloadData(around pagingItem: PagingItem) {
+        print("[Parchment][PVC] reloadData(around:) -> \(type(of: pagingItem))")
         switch dataSourceReference {
         case let .static(dataSource):
             dataSource.reloadItems()
@@ -457,6 +460,12 @@ open class PagingViewController:
     /// - Parameter animated: A boolean value that indicates whether
     /// the transtion should be animated. Default is false.
     open func select(index: Int, animated: Bool = false) {
+        var count: Int = -1
+        switch dataSourceReference {
+        case let .static(dataSource): count = dataSource.items.count
+        case let .finite(dataSource): count = dataSource.items.count
+        case .none: count = -1
+        }
         switch dataSourceReference {
         case let .static(dataSource):
 			guard index < dataSource.items.count else { return }
