@@ -81,6 +81,12 @@ struct PagingControllerRepresentableView: UIViewControllerRepresentable {
             pagingViewController.reloadData()
         }
 
+        // Refresh currently visible page content if identity is unchanged
+        if let currentItem = pagingViewController.state.currentPagingItem as? PageItem,
+           let viewController = context.coordinator.controllers[currentItem.identifier]?.value {
+            currentItem.page.update(viewController)
+        }
+
         // HACK: If the user don't pass a selectedIndex binding, the
         // default parameter is set to .constant(Int.max) which allows
         // us to check here if a binding was passed in or not (it
