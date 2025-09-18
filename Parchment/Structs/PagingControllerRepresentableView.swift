@@ -81,8 +81,9 @@ struct PagingControllerRepresentableView: UIViewControllerRepresentable {
 
         // Keep selection only if the current item still exists in the NEW items.
         // Otherwise, reload around the first available item.
-        // If the identifiers changed, clear content immediately to avoid stale flash
-        if oldIdentifiers != newIdentifiers {
+        // If the identifiers changed, clear content to avoid stale flash, but only
+        // when there is existing content; avoid wiping initial presentation.
+        if oldIdentifiers != newIdentifiers, pagingViewController.state.currentPagingItem != nil {
             pagingViewController.removeContent()
         }
 
